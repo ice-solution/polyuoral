@@ -1,0 +1,786 @@
+{
+	"info": {
+		"name": "PolyU Oral Health API",
+		"description": "完整的口腔健康數據 API Collection",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "polyu-oral-api"
+	},
+	"item": [
+		{
+			"name": "Authentication",
+			"item": [
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Password\": \"password123\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/auth/login",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "login"]
+						},
+						"description": "登入並取得 JWT token"
+					},
+					"response": []
+				},
+				{
+					"name": "Verify Token",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/verify",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "verify"]
+						},
+						"description": "驗證當前 token 是否有效"
+					},
+					"response": []
+				},
+				{
+					"name": "Logout",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/auth/logout",
+							"host": ["{{base_url}}"],
+							"path": ["api", "auth", "logout"]
+						},
+						"description": "登出（客戶端需刪除 token）"
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Root",
+			"item": [
+				{
+					"name": "Get API Info",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/",
+							"host": ["{{base_url}}"],
+							"path": [""]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patients",
+			"item": [
+				{
+					"name": "Register Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"張三\",\n  \"Name_EN\": \"Zhang San\",\n  \"Age\": 30,\n  \"Month\": 6,\n  \"Email\": \"zhangsan@example.com\",\n  \"PhoneNumber\": \"12345678\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/register",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", "register"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient002\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"李四\",\n  \"Name_EN\": \"Li Si\",\n  \"Age\": 25,\n  \"Month\": 3,\n  \"Email\": \"lisi@example.com\",\n  \"PhoneNumber\": \"87654321\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Patients",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patients",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient by Login_ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patients/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Name_CN\": \"張三更新\",\n  \"Age\": 31\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patients/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Patient",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patients/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patients", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Patient Records",
+			"item": [
+				{
+					"name": "Create Patient Record (Photos only)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Login_ID",
+									"value": "patient001",
+									"type": "text"
+								},
+								{
+									"key": "FacePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TouguePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethEPhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto1",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto2",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto3",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto4",
+									"type": "file",
+									"src": []
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records"]
+						},
+						"description": "使用 form-data 上傳圖片。\n\n1. 選擇 Body → form-data\n2. Login_ID 選擇 Text，輸入病人的 Login_ID\n3. 每個照片欄位選擇 File，然後選擇圖片檔案\n4. 至少需要上傳一張照片（建議 FacePhoto）"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient Record (Photos + HRV + GSR)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "Login_ID",
+									"value": "patient001",
+									"type": "text"
+								},
+								{
+									"key": "FacePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TouguePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethEPhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto1",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto2",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto3",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethInPhoto4",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "HRV",
+									"value": "{\"minRRI\":500,\"LF\":100,\"HF\":50,\"HRV\":30,\"RMSSD\":25,\"pNN50\":10,\"SDNN\":40,\"SD1\":20,\"SD2\":30,\"SDPoint\":[]}",
+									"type": "text"
+								},
+								{
+									"key": "GSR",
+									"value": "{\"RawData\":[100,200,300],\"RawDataTime\":[0.1,0.2,0.3],\"SCL\":[1.5,1.6,1.7],\"SCR\":[0.1,0.2,0.15],\"numOfPeak\":3}",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records"]
+						},
+						"description": "使用 form-data 上傳圖片和數據。\n\n1. Login_ID: Text 類型，輸入病人的 Login_ID\n2. 照片欄位: File 類型，選擇圖片檔案\n3. HRV/GSR: Text 類型，輸入 JSON 字串\n\n注意：HRV 和 GSR 需要是 JSON 字串格式"
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Patient Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patient-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Records (with filters)",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patient-records?Login_ID=patient001&hasHRV=true&hasGSR=true&startDate=2024-01-01&endDate=2024-12-31",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records"],
+							"query": [
+								{
+									"key": "Login_ID",
+									"value": "patient001"
+								},
+								{
+									"key": "hasHRV",
+									"value": "true"
+								},
+								{
+									"key": "hasGSR",
+									"value": "true"
+								},
+								{
+									"key": "startDate",
+									"value": "2024-01-01"
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Records by Login_ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patient-records/patient/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records", "patient", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Patient Record by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patient-records/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Patient Record",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"HRV\": {\n    \"minRRI\": 600,\n    \"LF\": 120\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient-records/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Patch Patient Record",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"HRV\": {\n    \"minRRI\": 600\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient-records/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Patient Record",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/patient-records/:id",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records", ":id"],
+							"variable": [
+								{
+									"key": "id",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Reports",
+			"item": [
+				{
+					"name": "Generate PDF Report",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/:patientId/:recordId?language=zh_tw",
+							"host": ["{{base_url}}"],
+							"path": ["api", "report", ":patientId", ":recordId"],
+							"query": [
+								{
+									"key": "language",
+									"value": "zh_tw",
+									"description": "語言選項: en, zh, zh_tw, ja"
+								}
+							],
+							"variable": [
+								{
+									"key": "patientId",
+									"value": "507f1f77bcf86cd799439011"
+								},
+								{
+									"key": "recordId",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Report Status",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/report/:patientId/:recordId/status",
+							"host": ["{{base_url}}"],
+							"path": ["api", "report", ":patientId", ":recordId", "status"],
+							"variable": [
+								{
+									"key": "patientId",
+									"value": "507f1f77bcf86cd799439011"
+								},
+								{
+									"key": "recordId",
+									"value": "507f1f77bcf86cd799439012"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Data Records (備用)",
+			"item": [
+				{
+					"name": "Create Data Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"type\": \"HRV\",\n  \"HRV\": {\n    \"minRRI\": 500,\n    \"LF\": 100,\n    \"HF\": 50\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Data Records",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Data Records by Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/data-records/patient/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records", "patient", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Photos (備用)",
+			"item": [
+				{
+					"name": "Upload Photos",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"FacePhoto\": \"base64_encoded_image\",\n  \"TouguePhoto\": \"base64_encoded_image\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/photos",
+							"host": ["{{base_url}}"],
+							"path": ["api", "photos"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Photos by Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/photos/patient/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "photos", "patient", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Recommends",
+			"item": [
+				{
+					"name": "Create Recommend",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Recommend\": \"建議內容\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/recommends",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recommends"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Recommends by Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/recommends/patient/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "recommends", "patient", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "CheckLists",
+			"item": [
+				{
+					"name": "Create CheckList",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"checklistData\": {\n    \"item1\": \"value1\",\n    \"item2\": \"value2\"\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/checklists",
+							"host": ["{{base_url}}"],
+							"path": ["api", "checklists"]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get CheckLists by Patient",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/checklists/patient/:loginId",
+							"host": ["{{base_url}}"],
+							"path": ["api", "checklists", "patient", ":loginId"],
+							"variable": [
+								{
+									"key": "loginId",
+									"value": "patient001"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:3000",
+			"type": "string"
+		},
+		{
+			"key": "token",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
+

@@ -1,0 +1,644 @@
+openapi: 3.0.0
+info:
+  title: PolyU Oral Health API
+  description: 口腔健康數據管理 API
+  version: 1.0.0
+  contact:
+    name: API Support
+
+servers:
+  - url: http://localhost:3000
+    description: 本地開發伺服器
+  - url: https://api.example.com
+    description: 生產環境伺服器
+
+tags:
+  - name: Authentication
+    description: 認證相關 API
+  - name: Patients
+    description: 病人管理
+  - name: Patient Records
+    description: 病人記錄（包含圖片上傳）
+  - name: Reports
+    description: PDF 報告生成
+
+paths:
+  /api/auth/login:
+    post:
+      tags:
+        - Authentication
+      summary: 登入取得 Token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - Login_ID
+                - Password
+              properties:
+                Login_ID:
+                  type: string
+                  example: patient001
+                Password:
+                  type: string
+                  example: password123
+      responses:
+        '200':
+          description: 登入成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  token:
+                    type: string
+                  patient:
+                    $ref: '#/components/schemas/Patient'
+        '401':
+          description: 登入失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/auth/verify:
+    get:
+      tags:
+        - Authentication
+      summary: 驗證 Token
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Token 有效
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  valid:
+                    type: boolean
+                  patient:
+                    $ref: '#/components/schemas/Patient'
+        '401':
+          description: Token 無效或過期
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/patients/register:
+    post:
+      tags:
+        - Patients
+      summary: 註冊病人
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRegister'
+      responses:
+        '201':
+          description: 註冊成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  patient:
+                    $ref: '#/components/schemas/Patient'
+        '400':
+          description: 缺少必填欄位
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '409':
+          description: Login_ID 或 Email 已存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/patients:
+    get:
+      tags:
+        - Patients
+      summary: 取得所有病人
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Patient'
+
+  /api/patients/{loginId}:
+    get:
+      tags:
+        - Patients
+      summary: 取得特定病人
+      parameters:
+        - name: loginId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Patient'
+        '404':
+          description: 病人不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/patient-records:
+    post:
+      tags:
+        - Patient Records
+      summary: 建立病人記錄（上傳圖片）
+      description: 使用 multipart/form-data 上傳圖片和數據
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+                - Login_ID
+              properties:
+                Login_ID:
+                  type: string
+                  example: patient001
+                FacePhoto:
+                  type: string
+                  format: binary
+                TouguePhoto:
+                  type: string
+                  format: binary
+                TeethEPhoto:
+                  type: string
+                  format: binary
+                TeethInPhoto1:
+                  type: string
+                  format: binary
+                TeethInPhoto2:
+                  type: string
+                  format: binary
+                TeethInPhoto3:
+                  type: string
+                  format: binary
+                TeethInPhoto4:
+                  type: string
+                  format: binary
+                HRV:
+                  type: string
+                  description: JSON 字串
+                  example: '{"minRRI":500,"LF":100,"HF":50}'
+                GSR:
+                  type: string
+                  description: JSON 字串
+                  example: '{"RawData":[100,200,300],"numOfPeak":3}'
+      responses:
+        '201':
+          description: 建立成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  record:
+                    $ref: '#/components/schemas/PatientRecord'
+        '400':
+          description: 驗證失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: 病人不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Patient Records
+      summary: 取得所有記錄
+      parameters:
+        - name: Login_ID
+          in: query
+          schema:
+            type: string
+        - name: hasHRV
+          in: query
+          schema:
+            type: boolean
+        - name: hasGSR
+          in: query
+          schema:
+            type: boolean
+        - name: startDate
+          in: query
+          schema:
+            type: string
+            format: date
+        - name: endDate
+          in: query
+          schema:
+            type: string
+            format: date
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientRecord'
+
+  /api/patient-records/patient/{loginId}:
+    get:
+      tags:
+        - Patient Records
+      summary: 取得特定病人的所有記錄
+      parameters:
+        - name: loginId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PatientRecord'
+
+  /api/patient-records/{id}:
+    get:
+      tags:
+        - Patient Records
+      summary: 取得特定記錄
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientRecord'
+        '404':
+          description: 記錄不存在
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Patient Records
+      summary: 更新記錄
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRecordUpdate'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientRecord'
+
+    patch:
+      tags:
+        - Patient Records
+      summary: 部分更新記錄
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatientRecordUpdate'
+      responses:
+        '200':
+          description: 更新成功
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PatientRecord'
+
+    delete:
+      tags:
+        - Patient Records
+      summary: 刪除記錄
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 刪除成功
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+
+  /api/report/{patientId}/{recordId}:
+    get:
+      tags:
+        - Reports
+      summary: 生成 PDF 報告
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: language
+          in: query
+          schema:
+            type: string
+            enum: [en, zh, zh_tw, ja]
+            default: en
+      responses:
+        '200':
+          description: PDF 檔案
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '404':
+          description: 記錄不存在或沒有 FacePhoto
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: PDF 生成失敗
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/report/{patientId}/{recordId}/status:
+    get:
+      tags:
+        - Reports
+      summary: 檢查報告狀態
+      parameters:
+        - name: patientId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: recordId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: 狀態資訊
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  exists:
+                    type: boolean
+                  hasFacePhoto:
+                    type: boolean
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Patient:
+      type: object
+      properties:
+        _id:
+          type: string
+        Login_ID:
+          type: string
+        Name_CN:
+          type: string
+        Name_EN:
+          type: string
+        Age:
+          type: number
+        Month:
+          type: number
+        Email:
+          type: string
+        PhoneNumber:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PatientRegister:
+      type: object
+      required:
+        - Login_ID
+        - Password
+        - Name_CN
+        - Name_EN
+        - Age
+        - Month
+        - Email
+        - PhoneNumber
+      properties:
+        Login_ID:
+          type: string
+        Password:
+          type: string
+        Name_CN:
+          type: string
+        Name_EN:
+          type: string
+        Age:
+          type: number
+        Month:
+          type: number
+        Email:
+          type: string
+        PhoneNumber:
+          type: string
+
+    PatientRecord:
+      type: object
+      properties:
+        _id:
+          type: string
+        patientId:
+          $ref: '#/components/schemas/Patient'
+        Login_ID:
+          type: string
+        UploadDateTime:
+          type: string
+          format: date-time
+        Photos:
+          type: object
+          properties:
+            FacePhoto:
+              type: string
+              description: 圖片 URL 路徑
+            TouguePhoto:
+              type: string
+            TeethEPhoto:
+              type: string
+            TeethInPhoto1:
+              type: string
+            TeethInPhoto2:
+              type: string
+            TeethInPhoto3:
+              type: string
+            TeethInPhoto4:
+              type: string
+        HRV:
+          type: object
+          properties:
+            minRRI:
+              type: number
+            LF:
+              type: number
+            HF:
+              type: number
+            HRV:
+              type: number
+            RMSSD:
+              type: number
+            pNN50:
+              type: number
+            SDNN:
+              type: number
+            SD1:
+              type: number
+            SD2:
+              type: number
+            SDPoint:
+              type: array
+              items:
+                type: object
+                properties:
+                  x:
+                    type: number
+                  y:
+                    type: number
+        GSR:
+          type: object
+          properties:
+            RawData:
+              type: array
+              items:
+                type: number
+            RawDataTime:
+              type: array
+              items:
+                type: number
+            SCL:
+              type: array
+              items:
+                type: number
+            SCR:
+              type: array
+              items:
+                type: number
+            numOfPeak:
+              type: number
+        Pulse:
+          type: object
+        Recommend:
+          type: string
+        CheckList:
+          type: object
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    PatientRecordUpdate:
+      type: object
+      properties:
+        HRV:
+          type: object
+        GSR:
+          type: object
+        Pulse:
+          type: object
+        Recommend:
+          type: string
+        CheckList:
+          type: object
+
+    Error:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: string
+

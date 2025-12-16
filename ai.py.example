@@ -1,0 +1,23 @@
+import os
+import json
+import base64
+import cv2
+import numpy as np
+import requests
+import tkinter as tk
+from tkinter import filedialog, messagebox
+from fpdf import FPDF
+from inference_sdk import InferenceHTTPClient
+from fpdf.enums import XPos, YPos
+
+
+ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY", "YOUR_ROBOFLOW_API_KEY")   
+WORKSPACE_NAME = os.getenv("WORKSPACE_NAME", "YOUR_WORKSPACE_NAME")               
+WORKFLOW_ID = os.getenv("WORKFLOW_ID", "YOUR_WORKFLOW_ID")   
+
+# ChatGPT API 設定
+CHATGPT_API_KEY = os.getenv("CHATGPT_API_KEY", "YOUR_CHATGPT_API_KEY")     # 請設定環境變數或填入您的 API Key
+CHATGPT_ENDPOINT = "https://api.openai.com/v1/chat/completions"
+
+# ... 其餘代碼保持不變 ...
+
