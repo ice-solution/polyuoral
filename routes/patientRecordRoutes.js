@@ -9,8 +9,8 @@ const Patient = require('../models/Patient');
 router.post('/', uploadPhotos, async (req, res) => {
   try {
     const { Login_ID, HRV, GSR, Pulse, Recommend, CheckList, UploadDateTime } = req.body;
-
-    // 驗證必填欄位
+    
+    // 驗證必填欄位（multer 已經解析了 form-data，所以 req.body 現在有值了）
     if (!Login_ID) {
       return res.status(400).json({ 
         error: 'Login_ID is required' 
@@ -20,6 +20,20 @@ router.post('/', uploadPhotos, async (req, res) => {
     // 驗證 Patient 是否存在
     const patient = await Patient.findOne({ Login_ID });
     if (!patient) {
+      // 如果 patient 不存在，清理已上傳的檔案
+      if (req.files) {
+        const fs = require('fs');
+        Object.keys(req.files).forEach(field => {
+          if (req.files[field] && req.files[field][0]) {
+            const filePath = req.files[field][0].path;
+            try {
+              fs.unlinkSync(filePath);
+            } catch (e) {
+              console.error('Error deleting file:', e);
+            }
+          }
+        });
+      }
       return res.status(404).json({ 
         error: 'Patient not found. Please register patient first.',
         message: '請先註冊病人帳號'
@@ -33,9 +47,42 @@ router.post('/', uploadPhotos, async (req, res) => {
     let hasAtLeastOnePhoto = false;
 
     if (req.files) {
+      const fs = require('fs');
+      const patientDir = path.join(__dirname, '..', 'public', patient._id.toString());
+      
+      // 確保正確的病人目錄存在
+      if (!fs.existsSync(patientDir)) {
+        fs.mkdirSync(patientDir, { recursive: true });
+      }
+      
       photoFields.forEach(field => {
         if (req.files[field] && req.files[field][0]) {
           const file = req.files[field][0];
+          const currentPath = file.path;
+          const targetPath = path.join(patientDir, file.filename);
+          
+          // 如果文件不在正確的目錄，移動它
+          if (currentPath !== targetPath) {
+            try {
+              // 確保目標目錄存在
+              const targetDir = path.dirname(targetPath);
+              if (!fs.existsSync(targetDir)) {
+                fs.mkdirSync(targetDir, { recursive: true });
+              }
+              // 移動文件到正確的目錄
+              fs.renameSync(currentPath, targetPath);
+            } catch (error) {
+              console.error(`Error moving file ${field}:`, error);
+              // 如果移動失敗，嘗試複製
+              try {
+                fs.copyFileSync(currentPath, targetPath);
+                fs.unlinkSync(currentPath); // 刪除原文件
+              } catch (copyError) {
+                console.error(`Error copying file ${field}:`, copyError);
+              }
+            }
+          }
+          
           // 建立 URL 路徑: /public/{patientId}/{filename}
           const photoUrl = `/public/${patient._id}/${file.filename}`;
           photos[field] = photoUrl;

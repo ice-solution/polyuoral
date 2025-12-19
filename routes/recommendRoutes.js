@@ -40,3 +40,4 @@ router.get('/patient/:loginId', async (req, res) => {
 
 module.exports = router;
 
+
