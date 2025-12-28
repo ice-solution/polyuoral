@@ -6,21 +6,21 @@ const Patient = require('../models/Patient');
 // 病人註冊 API
 router.post('/register', async (req, res) => {
   try {
-    const { Login_ID, Password, Name_CN, Name_EN, Age, Month, Email, PhoneNumber } = req.body;
+    const { loginid, Password, Name_CN, Name_EN, Age, Month, Email, PhoneNumber } = req.body;
 
     // 驗證必填欄位
-    if (!Login_ID || !Password || !Name_CN || !Name_EN || !Age || !Month || !Email || !PhoneNumber) {
+    if (!loginid || !Password || !Name_CN || !Name_EN || !Age || !Month || !Email || !PhoneNumber) {
       return res.status(400).json({ 
         error: 'Missing required fields',
-        required: ['Login_ID', 'Password', 'Name_CN', 'Name_EN', 'Age', 'Month', 'Email', 'PhoneNumber']
+        required: ['loginid', 'Password', 'Name_CN', 'Name_EN', 'Age', 'Month', 'Email', 'PhoneNumber']
       });
     }
 
-    // 檢查 Login_ID 是否已存在
-    const existingPatient = await Patient.findOne({ Login_ID });
+    // 檢查 loginid 是否已存在
+    const existingPatient = await Patient.findOne({ loginid });
     if (existingPatient) {
       return res.status(409).json({ 
-        error: 'Login_ID already exists',
+        error: 'loginid already exists',
         message: '此登入帳號已被使用，請使用其他帳號'
       });
     }
@@ -40,7 +40,7 @@ router.post('/register', async (req, res) => {
 
     // 建立新病人
     const patient = new Patient({
-      Login_ID,
+      loginid,
       Password: hashedPassword,
       Name_CN,
       Name_EN,
@@ -111,10 +111,10 @@ router.get('/', async (req, res) => {
   }
 });
 
-// 根據 Login_ID 取得病人資料
-router.get('/:loginId', async (req, res) => {
+// 根據 loginid 取得病人資料
+router.get('/:loginid', async (req, res) => {
   try {
-    const patient = await Patient.findOne({ Login_ID: req.params.loginId }).select('-Password');
+    const patient = await Patient.findOne({ loginid: req.params.loginid }).select('-Password');
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
     }
@@ -125,26 +125,99 @@ router.get('/:loginId', async (req, res) => {
 });
 
 // 更新病人資料
-router.put('/:loginId', async (req, res) => {
+router.put('/:loginid', async (req, res) => {
   try {
+    // 解碼 URL 參數（處理特殊字符）
+    const loginid = decodeURIComponent(req.params.loginid);
+    console.log(`更新用戶請求 - URL參數: ${req.params.loginid}, 解碼後: ${loginid}`);
+    
+    // 先查找當前用戶
+    // 如果 loginid 看起來像 MongoDB ObjectId（24個十六進制字符），則使用 _id 查找
+    // 否則使用 loginid 查找
+    let currentPatient;
+    if (loginid.match(/^[0-9a-fA-F]{24}$/)) {
+      // 看起來像 ObjectId，使用 _id 查找
+      currentPatient = await Patient.findById(loginid);
+    } else {
+      // 使用 loginid 查找
+      currentPatient = await Patient.findOne({ loginid: loginid });
+    }
+    
+    if (!currentPatient) {
+      console.error(`Patient not found with identifier: ${loginid}`);
+      // 嘗試查找所有患者，看看是否有類似的 loginid
+      const allPatients = await Patient.find().select('loginid _id');
+      console.log('當前數據庫中的所有 loginid:', allPatients.map(p => ({ loginid: p.loginid, _id: p._id })));
+      return res.status(404).json({ 
+        error: 'Patient not found',
+        message: `找不到用戶`
+      });
+    }
+
+    const updateData = { ...req.body };
+    
+    // 確定查找條件（使用 _id 或 loginid）
+    const findCondition = loginid.match(/^[0-9a-fA-F]{24}$/) 
+      ? { _id: loginid }
+      : { loginid: loginid };
+    
+    // 如果要更新 loginid，檢查新的 loginid 是否已被其他用戶使用
+    if (updateData.loginid && updateData.loginid !== currentPatient.loginid) {
+      const existingPatient = await Patient.findOne({ loginid: updateData.loginid });
+      if (existingPatient && existingPatient._id.toString() !== currentPatient._id.toString()) {
+        return res.status(409).json({ 
+          error: 'loginid already exists',
+          message: '此登入帳號已被其他用戶使用'
+        });
+      }
+    }
+    
+    // 如果提供了密碼，則加密
+    if (updateData.Password) {
+      const salt = await bcrypt.genSalt(10);
+      updateData.Password = await bcrypt.hash(updateData.Password, salt);
+    }
+    
+    // 如果要更新 Email，檢查新的 Email 是否已被其他用戶使用（排除當前用戶）
+    if (updateData.Email && updateData.Email !== currentPatient.Email) {
+      const existingEmail = await Patient.findOne({ 
+        Email: updateData.Email,
+        _id: { $ne: currentPatient._id } // 排除當前用戶（使用 _id）
+      });
+      if (existingEmail) {
+        return res.status(409).json({ 
+          error: 'Email already exists',
+          message: '此電子郵件已被其他用戶使用'
+        });
+      }
+    }
+    
     const patient = await Patient.findOneAndUpdate(
-      { Login_ID: req.params.loginId },
-      req.body,
+      findCondition,
+      updateData,
       { new: true, runValidators: true }
     ).select('-Password');
+    
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
     }
     res.json(patient);
   } catch (error) {
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern)[0];
+      return res.status(409).json({ 
+        error: `${field} already exists`,
+        message: '此資料已被使用'
+      });
+    }
     res.status(400).json({ error: error.message });
   }
 });
 
 // 刪除病人資料
-router.delete('/:loginId', async (req, res) => {
+router.delete('/:loginid', async (req, res) => {
   try {
-    const patient = await Patient.findOneAndDelete({ Login_ID: req.params.loginId });
+    const patient = await Patient.findOneAndDelete({ loginid: req.params.loginid });
     if (!patient) {
       return res.status(404).json({ error: 'Patient not found' });
     }

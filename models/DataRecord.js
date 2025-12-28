@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 // 統一的數據記錄 Schema
 // 使用 type 欄位來區分 HRV、GSR、把脈Data
 const dataRecordSchema = new mongoose.Schema({
-  Login_ID: {
+  loginid: {
     type: String,
     required: true,
     index: true
@@ -11,7 +11,7 @@ const dataRecordSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['HRV', 'GSR', 'Pulse'],
+    enum: ['HRV', 'GSR', 'HRV2', 'GSR2', 'Pulse'],
     index: true
   },
   UploadDateTime: {
@@ -22,27 +22,39 @@ const dataRecordSchema = new mongoose.Schema({
   },
   // HRV 數據
   HRV: {
-    minRRI: Number,
-    LF: Number,
-    HF: Number,
-    HRV: Number,
     RMSSD: Number,
-    pNN50: Number,
     SDNN: Number,
+    pNN50: Number,
     SD1: Number,
     SD2: Number,
-    SDPoint: [{
-      x: Number,
-      y: Number
-    }]
+    HeartBeat: [Number],
+    Times: [Number],
+    IBIms: [Number]
   },
   // GSR 數據
   GSR: {
-    RawData: [Number],
-    RawDataTime: [Number],
-    SCL: [Number],
-    SCR: [Number],
-    numOfPeak: Number
+    RawIndex: [Number],
+    RawValue: [Number],
+    RawTime: [Number],
+    SCL: [Number]
+  },
+  // HRV2 數據
+  HRV2: {
+    RMSSD: Number,
+    SDNN: Number,
+    pNN50: Number,
+    SD1: Number,
+    SD2: Number,
+    HeartBeat: [Number],
+    Times: [Number],
+    IBIms: [Number]
+  },
+  // GSR2 數據
+  GSR2: {
+    RawIndex: [Number],
+    RawValue: [Number],
+    RawTime: [Number],
+    SCL: [Number]
   },
   // 把脈Data
   Pulse: {
@@ -76,7 +88,7 @@ const dataRecordSchema = new mongoose.Schema({
 });
 
 // 複合索引：方便查詢特定病人的特定類型數據
-dataRecordSchema.index({ Login_ID: 1, type: 1, UploadDateTime: -1 });
+dataRecordSchema.index({ loginid: 1, type: 1, UploadDateTime: -1 });
 
 // 驗證：確保根據 type 只填寫對應的數據欄位
 dataRecordSchema.pre('save', function(next) {
@@ -85,6 +97,12 @@ dataRecordSchema.pre('save', function(next) {
   }
   if (this.type === 'GSR' && !this.GSR) {
     return next(new Error('GSR type requires GSR data'));
+  }
+  if (this.type === 'HRV2' && !this.HRV2) {
+    return next(new Error('HRV2 type requires HRV2 data'));
+  }
+  if (this.type === 'GSR2' && !this.GSR2) {
+    return next(new Error('GSR2 type requires GSR2 data'));
   }
   if (this.type === 'Pulse' && !this.Pulse) {
     return next(new Error('Pulse type requires Pulse data'));

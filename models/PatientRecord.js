@@ -9,7 +9,7 @@ const patientRecordSchema = new mongoose.Schema({
     required: true,
     index: true
   },
-  Login_ID: {
+  loginid: {
     type: String,
     required: true,
     index: true
@@ -53,27 +53,39 @@ const patientRecordSchema = new mongoose.Schema({
   },
   // HRV 數據（可選）
   HRV: {
-    minRRI: Number,
-    LF: Number,
-    HF: Number,
-    HRV: Number,
     RMSSD: Number,
-    pNN50: Number,
     SDNN: Number,
+    pNN50: Number,
     SD1: Number,
     SD2: Number,
-    SDPoint: [{
-      x: Number,
-      y: Number
-    }]
+    HeartBeat: [Number],
+    Times: [Number],
+    IBIms: [Number]
   },
   // GSR 數據（可選）
   GSR: {
-    RawData: [Number],
-    RawDataTime: [Number],
-    SCL: [Number],
-    SCR: [Number],
-    numOfPeak: Number
+    RawIndex: [Number],
+    RawValue: [Number],
+    RawTime: [Number],
+    SCL: [Number]
+  },
+  // HRV2 數據（可選）
+  HRV2: {
+    RMSSD: Number,
+    SDNN: Number,
+    pNN50: Number,
+    SD1: Number,
+    SD2: Number,
+    HeartBeat: [Number],
+    Times: [Number],
+    IBIms: [Number]
+  },
+  // GSR2 數據（可選）
+  GSR2: {
+    RawIndex: [Number],
+    RawValue: [Number],
+    RawTime: [Number],
+    SCL: [Number]
   },
   // 把脈Data（可選）
   Pulse: {
@@ -115,7 +127,7 @@ const patientRecordSchema = new mongoose.Schema({
 });
 
 // 複合索引：方便查詢特定病人的記錄
-patientRecordSchema.index({ Login_ID: 1, UploadDateTime: -1 });
+patientRecordSchema.index({ loginid: 1, UploadDateTime: -1 });
 patientRecordSchema.index({ patientId: 1, UploadDateTime: -1 });
 
 // 驗證：確保 Photos 必須存在，且至少有一張照片

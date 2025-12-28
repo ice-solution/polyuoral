@@ -16,8 +16,8 @@ router.post('/', async (req, res) => {
 // 取得所有檢查清單
 router.get('/', async (req, res) => {
   try {
-    const { Login_ID } = req.query;
-    const query = Login_ID ? { Login_ID } : {};
+    const { loginid } = req.query;
+    const query = loginid ? { loginid } : {};
     
     const checkLists = await CheckList.find(query)
       .sort({ UploadDateTime: -1 });
@@ -28,9 +28,9 @@ router.get('/', async (req, res) => {
 });
 
 // 取得特定病人的檢查清單
-router.get('/patient/:loginId', async (req, res) => {
+router.get('/patient/:loginid', async (req, res) => {
   try {
-    const checkLists = await CheckList.find({ Login_ID: req.params.loginId })
+    const checkLists = await CheckList.find({ loginid: req.params.loginid })
       .sort({ UploadDateTime: -1 });
     res.json(checkLists);
   } catch (error) {

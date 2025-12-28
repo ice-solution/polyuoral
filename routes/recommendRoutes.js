@@ -16,8 +16,8 @@ router.post('/', async (req, res) => {
 // 取得所有建議
 router.get('/', async (req, res) => {
   try {
-    const { Login_ID } = req.query;
-    const query = Login_ID ? { Login_ID } : {};
+    const { loginid } = req.query;
+    const query = loginid ? { loginid } : {};
     
     const recommends = await Recommend.find(query)
       .sort({ UploadDateTime: -1 });
@@ -28,9 +28,9 @@ router.get('/', async (req, res) => {
 });
 
 // 取得特定病人的建議
-router.get('/patient/:loginId', async (req, res) => {
+router.get('/patient/:loginid', async (req, res) => {
   try {
-    const recommends = await Recommend.find({ Login_ID: req.params.loginId })
+    const recommends = await Recommend.find({ loginid: req.params.loginid })
       .sort({ UploadDateTime: -1 });
     res.json(recommends);
   } catch (error) {

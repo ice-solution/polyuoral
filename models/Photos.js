@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const photosSchema = new mongoose.Schema({
-  Login_ID: {
+  loginid: {
     type: String,
     required: true,
     index: true
@@ -45,7 +45,7 @@ const photosSchema = new mongoose.Schema({
 });
 
 // 複合索引
-photosSchema.index({ Login_ID: 1, UploadDateTime: -1 });
+photosSchema.index({ loginid: 1, UploadDateTime: -1 });
 
 module.exports = mongoose.model('Photos', photosSchema);
 

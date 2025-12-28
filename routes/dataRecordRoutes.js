@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const DataRecord = require('../models/DataRecord');
 
-// 建立數據記錄（HRV、GSR、把脈Data）
+// 建立數據記錄（HRV、GSR、HRV2、GSR2、把脈Data）
 router.post('/', async (req, res) => {
   try {
     const dataRecord = new DataRecord(req.body);
@@ -16,10 +16,10 @@ router.post('/', async (req, res) => {
 // 取得所有數據記錄
 router.get('/', async (req, res) => {
   try {
-    const { Login_ID, type, startDate, endDate } = req.query;
+    const { loginid, type, startDate, endDate } = req.query;
     const query = {};
     
-    if (Login_ID) query.Login_ID = Login_ID;
+    if (loginid) query.loginid = loginid;
     if (type) query.type = type;
     if (startDate || endDate) {
       query.UploadDateTime = {};
@@ -36,10 +36,10 @@ router.get('/', async (req, res) => {
 });
 
 // 取得特定病人的數據記錄
-router.get('/patient/:loginId', async (req, res) => {
+router.get('/patient/:loginid', async (req, res) => {
   try {
     const { type, startDate, endDate } = req.query;
-    const query = { Login_ID: req.params.loginId };
+    const query = { loginid: req.params.loginid };
     
     if (type) query.type = type;
     if (startDate || endDate) {

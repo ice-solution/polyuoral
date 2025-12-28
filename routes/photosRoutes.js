@@ -16,10 +16,10 @@ router.post('/', async (req, res) => {
 // 取得所有照片記錄
 router.get('/', async (req, res) => {
   try {
-    const { Login_ID, startDate, endDate } = req.query;
+    const { loginid, startDate, endDate } = req.query;
     const query = {};
     
-    if (Login_ID) query.Login_ID = Login_ID;
+    if (loginid) query.loginid = loginid;
     if (startDate || endDate) {
       query.UploadDateTime = {};
       if (startDate) query.UploadDateTime.$gte = new Date(startDate);
@@ -35,9 +35,9 @@ router.get('/', async (req, res) => {
 });
 
 // 取得特定病人的照片
-router.get('/patient/:loginId', async (req, res) => {
+router.get('/patient/:loginid', async (req, res) => {
   try {
-    const photos = await Photos.find({ Login_ID: req.params.loginId })
+    const photos = await Photos.find({ loginid: req.params.loginid })
       .sort({ UploadDateTime: -1 });
     res.json(photos);
   } catch (error) {

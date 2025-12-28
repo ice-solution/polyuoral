@@ -75,22 +75,64 @@ router.get('/:patientId/:recordId', async (req, res) => {
 
     // 5. 呼叫 Python 腳本生成 PDF
     const pythonScript = path.join(__dirname, '..', 'generate_report.py');
-    const command = `python3 "${pythonScript}" "${tempImagePath}" "${pdfPath}" "${language}"`;
+    // 使用虛擬環境中的 Python（如果存在），否則使用系統 Python
+    const venvPython = path.join(__dirname, '..', 'venv', 'bin', 'python3');
+    const pythonCmd = require('fs').existsSync(venvPython) ? venvPython : 'python3';
+    
+    // 設置環境變數（從 process.env 傳遞給 Python 腳本）
+    const roboflowApiKey = process.env.ROBOFLOW_API_KEY || '';
+    const workspaceName = process.env.WORKSPACE_NAME || '';
+    const workflowId = process.env.WORKFLOW_ID || '';
+    
+    // 調試：檢查環境變數（不顯示完整 key）
+    const maskedKey = roboflowApiKey ? `${roboflowApiKey.substring(0, 4)}...${roboflowApiKey.substring(roboflowApiKey.length - 4)}` : 'NOT SET';
+    console.log(`[Report] Environment variables check:`);
+    console.log(`[Report]   ROBOFLOW_API_KEY: ${maskedKey}`);
+    console.log(`[Report]   WORKSPACE_NAME: ${workspaceName}`);
+    console.log(`[Report]   WORKFLOW_ID: ${workflowId}`);
+    
+    const env = {
+      ...process.env,
+      ROBOFLOW_API_KEY: roboflowApiKey,
+      WORKSPACE_NAME: workspaceName,
+      WORKFLOW_ID: workflowId,
+      GROK_API_KEY: process.env.GROK_API_KEY || process.env.CHATGPT_API_KEY || '',
+      GROK_ENDPOINT: process.env.GROK_ENDPOINT || 'https://api.x.ai/v1/chat/completions',
+      GROK_MODEL: process.env.GROK_MODEL || 'grok-4-1-fast-reasoning',
+      REPORT_LANGUAGE: language
+    };
+    
+    const command = `"${pythonCmd}" "${pythonScript}" "${tempImagePath}" "${pdfPath}" "${language}"`;
 
     console.log(`[Report] Executing: ${command}`);
 
     try {
       const { stdout, stderr } = await execAsync(command, {
         timeout: 300000, // 5 分鐘超時
-        maxBuffer: 10 * 1024 * 1024 // 10MB buffer
+        maxBuffer: 10 * 1024 * 1024, // 10MB buffer
+        env: env // 傳遞環境變數
       });
 
+      // 將 stderr 也記錄下來（可能包含有用的錯誤信息）
       if (stderr) {
         console.error('[Report] Python stderr:', stderr);
       }
+      
+      // 檢查 stdout 是否為空
+      const stdoutTrimmed = stdout.trim();
+      if (!stdoutTrimmed) {
+        throw new Error(`Python script returned no output. stderr: ${stderr || 'none'}`);
+      }
 
       // 解析 Python 腳本的 JSON 輸出
-      const result = JSON.parse(stdout.trim());
+      let result;
+      try {
+        result = JSON.parse(stdoutTrimmed);
+      } catch (parseError) {
+        console.error('[Report] Failed to parse Python output:', stdoutTrimmed);
+        console.error('[Report] stderr:', stderr);
+        throw new Error(`Failed to parse Python script output: ${parseError.message}. Output: ${stdoutTrimmed.substring(0, 200)}`);
+      }
 
       if (result.error) {
         // 清理臨時檔案
@@ -168,7 +210,7 @@ router.get('/:patientId/:recordId/status', async (req, res) => {
     const record = await PatientRecord.findOne({
       _id: recordId,
       patientId: patientId
-    }).select('Photos.FacePhoto Login_ID');
+    }).select('Photos.FacePhoto loginid');
 
     if (!record) {
       return res.status(404).json({

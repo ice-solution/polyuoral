@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const patientSchema = new mongoose.Schema({
-  Login_ID: {
+  loginid: {
     type: String,
     required: true,
     unique: true,

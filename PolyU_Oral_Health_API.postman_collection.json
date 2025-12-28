@@ -21,7 +21,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Password\": \"password123\"\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"Password\": \"password123\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/auth/login",
@@ -107,7 +107,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"張三\",\n  \"Name_EN\": \"Zhang San\",\n  \"Age\": 30,\n  \"Month\": 6,\n  \"Email\": \"zhangsan@example.com\",\n  \"PhoneNumber\": \"12345678\"\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"張三\",\n  \"Name_EN\": \"Zhang San\",\n  \"Age\": 30,\n  \"Month\": 6,\n  \"Email\": \"zhangsan@example.com\",\n  \"PhoneNumber\": \"12345678\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patients/register",
@@ -129,7 +129,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient002\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"李四\",\n  \"Name_EN\": \"Li Si\",\n  \"Age\": 25,\n  \"Month\": 3,\n  \"Email\": \"lisi@example.com\",\n  \"PhoneNumber\": \"87654321\"\n}"
+							"raw": "{\n  \"loginid\": \"patient002\",\n  \"Password\": \"password123\",\n  \"Name_CN\": \"李四\",\n  \"Name_EN\": \"Li Si\",\n  \"Age\": 25,\n  \"Month\": 3,\n  \"Email\": \"lisi@example.com\",\n  \"PhoneNumber\": \"87654321\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patients",
@@ -153,17 +153,17 @@
 					"response": []
 				},
 				{
-					"name": "Get Patient by Login_ID",
+					"name": "Get Patient by loginid",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/patients/:loginId",
+							"raw": "{{base_url}}/api/patients/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "patients", ":loginId"],
+							"path": ["api", "patients", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -186,12 +186,12 @@
 							"raw": "{\n  \"Name_CN\": \"張三更新\",\n  \"Age\": 31\n}"
 						},
 						"url": {
-							"raw": "{{base_url}}/api/patients/:loginId",
+							"raw": "{{base_url}}/api/patients/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "patients", ":loginId"],
+							"path": ["api", "patients", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -205,12 +205,12 @@
 						"method": "DELETE",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/patients/:loginId",
+							"raw": "{{base_url}}/api/patients/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "patients", ":loginId"],
+							"path": ["api", "patients", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -232,7 +232,7 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "Login_ID",
+									"key": "loginid",
 									"value": "patient001",
 									"type": "text"
 								},
@@ -278,7 +278,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "patient-records"]
 						},
-						"description": "使用 form-data 上傳圖片。\n\n1. 選擇 Body → form-data\n2. Login_ID 選擇 Text，輸入病人的 Login_ID\n3. 每個照片欄位選擇 File，然後選擇圖片檔案\n4. 至少需要上傳一張照片（建議 FacePhoto）"
+						"description": "使用 form-data 上傳圖片。\n\n1. 選擇 Body → form-data\n2. loginid 選擇 Text，輸入病人的 loginid\n3. 每個照片欄位選擇 File，然後選擇圖片檔案\n4. 至少需要上傳一張照片（建議 FacePhoto）"
 					},
 					"response": []
 				},
@@ -291,7 +291,7 @@
 							"mode": "formdata",
 							"formdata": [
 								{
-									"key": "Login_ID",
+									"key": "loginid",
 									"value": "patient001",
 									"type": "text"
 								},
@@ -332,12 +332,12 @@
 								},
 								{
 									"key": "HRV",
-									"value": "{\"minRRI\":500,\"LF\":100,\"HF\":50,\"HRV\":30,\"RMSSD\":25,\"pNN50\":10,\"SDNN\":40,\"SD1\":20,\"SD2\":30,\"SDPoint\":[]}",
+									"value": "{\"RMSSD\":25,\"SDNN\":40,\"pNN50\":10,\"SD1\":20,\"SD2\":30,\"HeartBeat\":[60,65,70],\"Times\":[0.1,0.2,0.3],\"IBIms\":[1000,950,900]}",
 									"type": "text"
 								},
 								{
 									"key": "GSR",
-									"value": "{\"RawData\":[100,200,300],\"RawDataTime\":[0.1,0.2,0.3],\"SCL\":[1.5,1.6,1.7],\"SCR\":[0.1,0.2,0.15],\"numOfPeak\":3}",
+									"value": "{\"RawIndex\":[0,1,2],\"RawValue\":[100,200,300],\"RawTime\":[0.1,0.2,0.3],\"SCL\":[1.5,1.6,1.7]}",
 									"type": "text"
 								}
 							]
@@ -347,7 +347,7 @@
 							"host": ["{{base_url}}"],
 							"path": ["api", "patient-records"]
 						},
-						"description": "使用 form-data 上傳圖片和數據。\n\n1. Login_ID: Text 類型，輸入病人的 Login_ID\n2. 照片欄位: File 類型，選擇圖片檔案\n3. HRV/GSR: Text 類型，輸入 JSON 字串\n\n注意：HRV 和 GSR 需要是 JSON 字串格式"
+						"description": "使用 form-data 上傳圖片和數據。\n\n1. loginid: Text 類型，輸入病人的 loginid\n2. 照片欄位: File 類型，選擇圖片檔案\n3. HRV/GSR: Text 類型，輸入 JSON 字串\n\n注意：HRV 和 GSR 需要是 JSON 字串格式"
 					},
 					"response": []
 				},
@@ -370,12 +370,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/patient-records?Login_ID=patient001&hasHRV=true&hasGSR=true&startDate=2024-01-01&endDate=2024-12-31",
+							"raw": "{{base_url}}/api/patient-records?loginid=patient001&hasHRV=true&hasGSR=true&startDate=2024-01-01&endDate=2024-12-31",
 							"host": ["{{base_url}}"],
 							"path": ["api", "patient-records"],
 							"query": [
 								{
-									"key": "Login_ID",
+									"key": "loginid",
 									"value": "patient001"
 								},
 								{
@@ -400,17 +400,17 @@
 					"response": []
 				},
 				{
-					"name": "Get Patient Records by Login_ID",
+					"name": "Get Patient Records by loginid",
 					"request": {
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/patient-records/patient/:loginId",
+							"raw": "{{base_url}}/api/patient-records/patient/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "patient-records", "patient", ":loginId"],
+							"path": ["api", "patient-records", "patient", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -449,7 +449,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"HRV\": {\n    \"minRRI\": 600,\n    \"LF\": 120\n  }\n}"
+							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40,\n    \"pNN50\": 10,\n    \"SD1\": 20,\n    \"SD2\": 30\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patient-records/:id",
@@ -477,7 +477,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"HRV\": {\n    \"minRRI\": 600\n  }\n}"
+							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patient-records/:id",
@@ -587,7 +587,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"type\": \"HRV\",\n  \"HRV\": {\n    \"minRRI\": 500,\n    \"LF\": 100,\n    \"HF\": 50\n  }\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"HRV\",\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40,\n    \"pNN50\": 10,\n    \"SD1\": 20,\n    \"SD2\": 30\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/data-records",
@@ -616,12 +616,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/data-records/patient/:loginId",
+							"raw": "{{base_url}}/api/data-records/patient/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "data-records", "patient", ":loginId"],
+							"path": ["api", "data-records", "patient", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -646,7 +646,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"FacePhoto\": \"base64_encoded_image\",\n  \"TouguePhoto\": \"base64_encoded_image\"\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"FacePhoto\": \"base64_encoded_image\",\n  \"TouguePhoto\": \"base64_encoded_image\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/photos",
@@ -662,12 +662,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/photos/patient/:loginId",
+							"raw": "{{base_url}}/api/photos/patient/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "photos", "patient", ":loginId"],
+							"path": ["api", "photos", "patient", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -692,7 +692,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"Recommend\": \"建議內容\"\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"Recommend\": \"建議內容\"\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/recommends",
@@ -708,12 +708,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/recommends/patient/:loginId",
+							"raw": "{{base_url}}/api/recommends/patient/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "recommends", "patient", ":loginId"],
+							"path": ["api", "recommends", "patient", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]
@@ -738,7 +738,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"Login_ID\": \"patient001\",\n  \"checklistData\": {\n    \"item1\": \"value1\",\n    \"item2\": \"value2\"\n  }\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"checklistData\": {\n    \"item1\": \"value1\",\n    \"item2\": \"value2\"\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/checklists",
@@ -754,12 +754,12 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/checklists/patient/:loginId",
+							"raw": "{{base_url}}/api/checklists/patient/:loginid",
 							"host": ["{{base_url}}"],
-							"path": ["api", "checklists", "patient", ":loginId"],
+							"path": ["api", "checklists", "patient", ":loginid"],
 							"variable": [
 								{
-									"key": "loginId",
+									"key": "loginid",
 									"value": "patient001"
 								}
 							]

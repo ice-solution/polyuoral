@@ -35,10 +35,10 @@ paths:
             schema:
               type: object
               required:
-                - Login_ID
+                - loginid
                 - Password
               properties:
-                Login_ID:
+                loginid:
                   type: string
                   example: patient001
                 Password:
@@ -121,7 +121,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Error'
         '409':
-          description: Login_ID 或 Email 已存在
+          description: loginid 或 Email 已存在
           content:
             application/json:
               schema:
@@ -142,13 +142,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/Patient'
 
-  /api/patients/{loginId}:
+  /api/patients/{loginid}:
     get:
       tags:
         - Patients
       summary: 取得特定病人
       parameters:
-        - name: loginId
+        - name: loginid
           in: path
           required: true
           schema:
@@ -180,9 +180,9 @@ paths:
             schema:
               type: object
               required:
-                - Login_ID
+                - loginid
               properties:
-                Login_ID:
+                loginid:
                   type: string
                   example: patient001
                 FacePhoto:
@@ -209,11 +209,11 @@ paths:
                 HRV:
                   type: string
                   description: JSON 字串
-                  example: '{"minRRI":500,"LF":100,"HF":50}'
+                  example: '{"RMSSD":25,"SDNN":40,"pNN50":10,"SD1":20,"SD2":30,"HeartBeat":[60,65,70],"Times":[0.1,0.2,0.3],"IBIms":[1000,950,900]}'
                 GSR:
                   type: string
                   description: JSON 字串
-                  example: '{"RawData":[100,200,300],"numOfPeak":3}'
+                  example: '{"RawIndex":[0,1,2],"RawValue":[100,200,300],"RawTime":[0.1,0.2,0.3],"SCL":[1.5,1.6,1.7]}'
       responses:
         '201':
           description: 建立成功
@@ -244,7 +244,7 @@ paths:
         - Patient Records
       summary: 取得所有記錄
       parameters:
-        - name: Login_ID
+        - name: loginid
           in: query
           schema:
             type: string
@@ -276,13 +276,13 @@ paths:
                 items:
                   $ref: '#/components/schemas/PatientRecord'
 
-  /api/patient-records/patient/{loginId}:
+  /api/patient-records/patient/{loginid}:
     get:
       tags:
         - Patient Records
       summary: 取得特定病人的所有記錄
       parameters:
-        - name: loginId
+        - name: loginid
           in: path
           required: true
           schema:
@@ -474,7 +474,7 @@ components:
       properties:
         _id:
           type: string
-        Login_ID:
+        loginid:
           type: string
         Name_CN:
           type: string
@@ -498,7 +498,7 @@ components:
     PatientRegister:
       type: object
       required:
-        - Login_ID
+        - loginid
         - Password
         - Name_CN
         - Name_EN
@@ -507,7 +507,7 @@ components:
         - Email
         - PhoneNumber
       properties:
-        Login_ID:
+        loginid:
           type: string
         Password:
           type: string
@@ -531,7 +531,7 @@ components:
           type: string
         patientId:
           $ref: '#/components/schemas/Patient'
-        Login_ID:
+        loginid:
           type: string
         UploadDateTime:
           type: string
@@ -557,41 +557,40 @@ components:
         HRV:
           type: object
           properties:
-            minRRI:
-              type: number
-            LF:
-              type: number
-            HF:
-              type: number
-            HRV:
-              type: number
             RMSSD:
               type: number
-            pNN50:
-              type: number
             SDNN:
+              type: number
+            pNN50:
               type: number
             SD1:
               type: number
             SD2:
               type: number
-            SDPoint:
-              type: array
-              items:
-                type: object
-                properties:
-                  x:
-                    type: number
-                  y:
-                    type: number
-        GSR:
-          type: object
-          properties:
-            RawData:
+            HeartBeat:
               type: array
               items:
                 type: number
-            RawDataTime:
+            Times:
+              type: array
+              items:
+                type: number
+            IBIms:
+              type: array
+              items:
+                type: number
+        GSR:
+          type: object
+          properties:
+            RawIndex:
+              type: array
+              items:
+                type: number
+            RawValue:
+              type: array
+              items:
+                type: number
+            RawTime:
               type: array
               items:
                 type: number
@@ -599,12 +598,6 @@ components:
               type: array
               items:
                 type: number
-            SCR:
-              type: array
-              items:
-                type: number
-            numOfPeak:
-              type: number
         Pulse:
           type: object
         Recommend:

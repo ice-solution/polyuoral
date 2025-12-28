@@ -8,17 +8,17 @@ const Patient = require('../models/Patient');
 // 建立完整的 PatientRecord（使用 multer 上傳圖片）
 router.post('/', uploadPhotos, async (req, res) => {
   try {
-    const { Login_ID, HRV, GSR, Pulse, Recommend, CheckList, UploadDateTime } = req.body;
+    const { loginid, HRV, GSR, HRV2, GSR2, Pulse, Recommend, CheckList, UploadDateTime } = req.body;
     
     // 驗證必填欄位（multer 已經解析了 form-data，所以 req.body 現在有值了）
-    if (!Login_ID) {
+    if (!loginid) {
       return res.status(400).json({ 
-        error: 'Login_ID is required' 
+        error: 'loginid is required' 
       });
     }
 
     // 驗證 Patient 是否存在
-    const patient = await Patient.findOne({ Login_ID });
+    const patient = await Patient.findOne({ loginid });
     if (!patient) {
       // 如果 patient 不存在，清理已上傳的檔案
       if (req.files) {
@@ -102,7 +102,7 @@ router.post('/', uploadPhotos, async (req, res) => {
 
     // 建立 PatientRecord
     const recordData = {
-      Login_ID,
+      loginid,
       patientId: patient._id,
       Photos: photos
     };
@@ -122,6 +122,24 @@ router.post('/', uploadPhotos, async (req, res) => {
         recordData.GSR = typeof GSR === 'string' ? JSON.parse(GSR) : GSR;
       } catch (e) {
         recordData.GSR = GSR;
+      }
+    }
+
+    // 可選：添加 HRV2（如果提供）
+    if (HRV2) {
+      try {
+        recordData.HRV2 = typeof HRV2 === 'string' ? JSON.parse(HRV2) : HRV2;
+      } catch (e) {
+        recordData.HRV2 = HRV2;
+      }
+    }
+
+    // 可選：添加 GSR2（如果提供）
+    if (GSR2) {
+      try {
+        recordData.GSR2 = typeof GSR2 === 'string' ? JSON.parse(GSR2) : GSR2;
+      } catch (e) {
+        recordData.GSR2 = GSR2;
       }
     }
 
@@ -196,10 +214,10 @@ router.post('/', uploadPhotos, async (req, res) => {
 // 取得所有 PatientRecord
 router.get('/', async (req, res) => {
   try {
-    const { Login_ID, startDate, endDate, hasHRV, hasGSR, hasPulse } = req.query;
+    const { loginid, startDate, endDate, hasHRV, hasGSR, hasHRV2, hasGSR2, hasPulse } = req.query;
     const query = {};
     
-    if (Login_ID) query.Login_ID = Login_ID;
+    if (loginid) query.loginid = loginid;
     if (startDate || endDate) {
       query.UploadDateTime = {};
       if (startDate) query.UploadDateTime.$gte = new Date(startDate);
@@ -207,6 +225,8 @@ router.get('/', async (req, res) => {
     }
     if (hasHRV === 'true') query.HRV = { $exists: true, $ne: null };
     if (hasGSR === 'true') query.GSR = { $exists: true, $ne: null };
+    if (hasHRV2 === 'true') query.HRV2 = { $exists: true, $ne: null };
+    if (hasGSR2 === 'true') query.GSR2 = { $exists: true, $ne: null };
     if (hasPulse === 'true') query.Pulse = { $exists: true, $ne: null };
     
     const records = await PatientRecord.find(query)
@@ -220,9 +240,9 @@ router.get('/', async (req, res) => {
 });
 
 // 取得特定病人的所有記錄
-router.get('/patient/:loginId', async (req, res) => {
+router.get('/patient/:loginid', async (req, res) => {
   try {
-    const records = await PatientRecord.find({ Login_ID: req.params.loginId })
+    const records = await PatientRecord.find({ loginid: req.params.loginid })
       .populate('patientId')
       .sort({ UploadDateTime: -1 });
     

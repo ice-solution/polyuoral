@@ -7,25 +7,28 @@ const Patient = require('../models/Patient');
 // 登入
 router.post('/login', async (req, res) => {
   try {
-    const { Login_ID, Password } = req.body;
+    const { loginid, Password } = req.body;
 
     // 驗證必填欄位
-    if (!Login_ID || !Password) {
+    if (!loginid || !Password) {
       return res.status(400).json({
         error: 'Missing required fields',
-        message: '請提供 Login_ID 和 Password'
+        message: '請提供 loginid 和 Password'
       });
     }
 
     // 查詢病人
-    const patient = await Patient.findOne({ Login_ID });
+    const patient = await Patient.findOne({ loginid });
     
     if (!patient) {
+      console.log(`登入失敗: 找不到帳號 ${loginid}`);
       return res.status(401).json({
         error: 'Invalid credentials',
         message: '登入帳號或密碼錯誤'
       });
     }
+
+    console.log(`嘗試登入: ${loginid}, 找到用戶: ${patient.loginid}`);
 
     // 驗證密碼
     // 注意：如果密碼是明文儲存，需要先更新為加密儲存
@@ -49,17 +52,20 @@ router.post('/login', async (req, res) => {
     }
 
     if (!isPasswordValid) {
+      console.log(`登入失敗: 密碼錯誤 (帳號: ${loginid})`);
       return res.status(401).json({
         error: 'Invalid credentials',
         message: '登入帳號或密碼錯誤'
       });
     }
 
+    console.log(`登入成功: ${loginid}`);
+
     // 生成 JWT token
     const token = jwt.sign(
       { 
         id: patient._id,
-        Login_ID: patient.Login_ID 
+        loginid: patient.loginid 
       },
       process.env.JWT_SECRET,
       { 

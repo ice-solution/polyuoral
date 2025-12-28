@@ -11,13 +11,27 @@ import cv2
 import numpy as np
 import requests
 from fpdf import FPDF
-from inference_sdk import InferenceHTTPClient
+try:
+    from inference_sdk import InferenceHTTPClient
+except ImportError:
+    # 如果 inference_sdk 不可用，嘗試使用 requests 直接調用 API
+    InferenceHTTPClient = None
 from fpdf.enums import XPos, YPos
 
 # API 設定
 ROBOFLOW_API_KEY = os.getenv("ROBOFLOW_API_KEY", "")
 WORKSPACE_NAME = os.getenv("WORKSPACE_NAME", "")
 WORKFLOW_ID = os.getenv("WORKFLOW_ID", "")
+
+# 調試：檢查環境變數是否正確讀取（不顯示完整 key，只顯示前後幾位）
+if ROBOFLOW_API_KEY:
+    masked_key = f"{ROBOFLOW_API_KEY[:4]}...{ROBOFLOW_API_KEY[-4:]}" if len(ROBOFLOW_API_KEY) > 8 else "***"
+    print(f"[DEBUG] ROBOFLOW_API_KEY loaded: {masked_key}", file=sys.stderr)
+else:
+    print("[DEBUG] ROBOFLOW_API_KEY is empty or not set", file=sys.stderr)
+
+print(f"[DEBUG] WORKSPACE_NAME: {WORKSPACE_NAME}", file=sys.stderr)
+print(f"[DEBUG] WORKFLOW_ID: {WORKFLOW_ID}", file=sys.stderr)
 
 # Grok API 設定（使用 x.ai）
 GROK_API_KEY = os.getenv("GROK_API_KEY", os.getenv("CHATGPT_API_KEY", ""))  # 支援舊的環境變數名稱
@@ -53,19 +67,69 @@ def decode_and_save(b64_string, name):
 
 def run_roboflow(image_path):
     """執行 Roboflow 分析"""
-    client = InferenceHTTPClient(api_url="https://serverless.roboflow.com", api_key=ROBOFLOW_API_KEY)
-    result = client.run_workflow(
-        workspace_name=WORKSPACE_NAME,
-        workflow_id=WORKFLOW_ID,
-        images={"image": image_path},
-        use_cache=True
-    )
-    saved_files = []
-    item = result[0]
-    for key in ["polygon_visualization", "mask_visualization"]:
-        if key in item:
-            saved_files.append(decode_and_save(item[key], key))
-    return saved_files
+    # 檢查必要的環境變數
+    if not ROBOFLOW_API_KEY:
+        raise ValueError("ROBOFLOW_API_KEY environment variable is not set")
+    if not WORKSPACE_NAME:
+        raise ValueError("WORKSPACE_NAME environment variable is not set")
+    if not WORKFLOW_ID:
+        raise ValueError("WORKFLOW_ID environment variable is not set")
+    
+    if InferenceHTTPClient is None:
+        # 如果沒有 inference_sdk，使用 requests 直接調用 API
+        import base64
+        try:
+            with open(image_path, "rb") as f:
+                image_data = base64.b64encode(f.read()).decode("utf-8")
+            
+            url = f"https://serverless.roboflow.com/workflow/{WORKSPACE_NAME}/{WORKFLOW_ID}"
+            headers = {
+                "Authorization": f"Bearer {ROBOFLOW_API_KEY}",
+                "Content-Type": "application/json"
+            }
+            data = {
+                "image": f"data:image/jpeg;base64,{image_data}",
+                "use_cache": True
+            }
+            
+            response = requests.post(url, headers=headers, json=data, timeout=120)
+            response.raise_for_status()
+            result = response.json()
+            
+            saved_files = []
+            if isinstance(result, list) and len(result) > 0:
+                item = result[0]
+                for key in ["polygon_visualization", "mask_visualization"]:
+                    if key in item:
+                        saved_files.append(decode_and_save(item[key], key))
+            return saved_files
+        except requests.exceptions.RequestException as e:
+            error_msg = f"Roboflow API request failed: {str(e)}"
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                    error_msg += f" - Response: {error_detail}"
+                except:
+                    error_msg += f" - Status: {e.response.status_code}, Body: {e.response.text[:200]}"
+            raise Exception(error_msg) from e
+    else:
+        # 使用 inference_sdk
+        try:
+            client = InferenceHTTPClient(api_url="https://serverless.roboflow.com", api_key=ROBOFLOW_API_KEY)
+            result = client.run_workflow(
+                workspace_name=WORKSPACE_NAME,
+                workflow_id=WORKFLOW_ID,
+                images={"image": image_path},
+                use_cache=True
+            )
+            saved_files = []
+            item = result[0]
+            for key in ["polygon_visualization", "mask_visualization"]:
+                if key in item:
+                    saved_files.append(decode_and_save(item[key], key))
+            return saved_files
+        except Exception as e:
+            raise Exception(f"Roboflow inference_sdk failed: {str(e)}") from e
 
 def calculate_plaque_area(mask_path):
     """計算牙菌斑面積"""
@@ -249,7 +313,15 @@ def main():
     try:
         # 1. 執行 Roboflow 分析
         print("[INFO] Running Roboflow analysis...", file=sys.stderr)
-        image_files = run_roboflow(image_path)
+        try:
+            image_files = run_roboflow(image_path)
+        except Exception as roboflow_error:
+            error_msg = str(roboflow_error)
+            print(f"[ERROR] Roboflow analysis failed: {error_msg}", file=sys.stderr)
+            print(json.dumps({
+                "error": f"Roboflow analysis failed: {error_msg}"
+            }))
+            sys.exit(1)
         
         if not image_files:
             print(json.dumps({

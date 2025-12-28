@@ -30,7 +30,7 @@ const authenticate = async (req, res, next) => {
     // 將病人資訊附加到 request
     req.patient = patient;
     req.patientId = patient._id;
-    req.loginId = patient.Login_ID;
+    req.loginid = patient.loginid;
     
     next();
   } catch (error) {
@@ -67,7 +67,7 @@ const optionalAuthenticate = async (req, res, next) => {
       if (patient) {
         req.patient = patient;
         req.patientId = patient._id;
-        req.loginId = patient.Login_ID;
+        req.loginid = patient.loginid;
       }
     }
     
