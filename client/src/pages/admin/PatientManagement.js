@@ -18,8 +18,15 @@ import {
   Alert,
   CircularProgress,
   IconButton,
+  Chip,
+  Select,
+  MenuItem,
+  FormControl,
+  InputLabel,
+  Link as MuiLink,
 } from '@mui/material';
 import { Add as AddIcon, Delete as DeleteIcon, Edit as EditIcon } from '@mui/icons-material';
+import { Link } from 'react-router-dom';
 import { patientAPI } from '../../services/api';
 
 const PatientManagement = () => {
@@ -38,6 +45,7 @@ const PatientManagement = () => {
     Month: '',
     Email: '',
     PhoneNumber: '',
+    status: 'active',
   });
 
   useEffect(() => {
@@ -98,6 +106,7 @@ const PatientManagement = () => {
       loginid: patient.loginid || '',
       Password: '', // 編輯時不顯示密碼，留空表示不修改
       Name_CN: patient.Name_CN || '',
+      status: patient.status || 'active',
       Name_EN: patient.Name_EN || '',
       Age: patient.Age !== undefined && patient.Age !== null ? String(patient.Age) : '',
       Month: patient.Month !== undefined && patient.Month !== null ? String(patient.Month) : '',
@@ -202,19 +211,47 @@ const PatientManagement = () => {
               <TableCell>月份</TableCell>
               <TableCell>電子郵件</TableCell>
               <TableCell>電話</TableCell>
+              <TableCell>狀態</TableCell>
               <TableCell>操作</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {patients.map((patient) => (
               <TableRow key={patient._id}>
-                <TableCell>{patient.loginid}</TableCell>
+                <TableCell>
+                  {patient.loginid ? (
+                    <MuiLink
+                      component={Link}
+                      to={`/admin/records?loginid=${encodeURIComponent(patient.loginid)}`}
+                      underline="hover"
+                      sx={{
+                        color: 'primary.main',
+                        fontWeight: 500,
+                        cursor: 'pointer',
+                        '&:hover': {
+                          color: 'primary.dark',
+                        },
+                      }}
+                    >
+                      {patient.loginid}
+                    </MuiLink>
+                  ) : (
+                    patient.loginid || '無'
+                  )}
+                </TableCell>
                 <TableCell>{patient.Name_CN}</TableCell>
                 <TableCell>{patient.Name_EN}</TableCell>
                 <TableCell>{patient.Age}</TableCell>
                 <TableCell>{patient.Month}</TableCell>
                 <TableCell>{patient.Email}</TableCell>
                 <TableCell>{patient.PhoneNumber}</TableCell>
+                <TableCell>
+                  <Chip
+                    label={patient.status === 'active' ? '啟用' : '停用'}
+                    color={patient.status === 'active' ? 'success' : 'default'}
+                    size="small"
+                  />
+                </TableCell>
                 <TableCell>
                   <IconButton
                     color="primary"
@@ -251,6 +288,7 @@ const PatientManagement = () => {
             Month: '',
             Email: '',
             PhoneNumber: '',
+            status: 'active',
           });
         }} 
         maxWidth="sm" 
@@ -320,6 +358,17 @@ const PatientManagement = () => {
               required
               fullWidth
             />
+            <FormControl fullWidth>
+              <InputLabel>狀態</InputLabel>
+              <Select
+                value={formData.status || 'active'}
+                label="狀態"
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+              >
+                <MenuItem value="active">啟用</MenuItem>
+                <MenuItem value="inactive">停用</MenuItem>
+              </Select>
+            </FormControl>
           </Box>
         </DialogContent>
         <DialogActions>
@@ -332,6 +381,7 @@ const PatientManagement = () => {
               Password: '',
               Name_CN: '',
               Name_EN: '',
+              status: 'active',
               Age: '',
               Month: '',
               Email: '',

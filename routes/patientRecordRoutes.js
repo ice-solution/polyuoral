@@ -230,7 +230,7 @@ router.get('/', async (req, res) => {
     if (hasPulse === 'true') query.Pulse = { $exists: true, $ne: null };
     
     const records = await PatientRecord.find(query)
-      .populate('patientId')
+      .populate('patientId', 'loginid Name_CN Name_EN Email PhoneNumber Age Month')
       .sort({ UploadDateTime: -1 });
     
     res.json(records);
@@ -243,7 +243,7 @@ router.get('/', async (req, res) => {
 router.get('/patient/:loginid', async (req, res) => {
   try {
     const records = await PatientRecord.find({ loginid: req.params.loginid })
-      .populate('patientId')
+      .populate('patientId', 'loginid Name_CN Name_EN Email PhoneNumber Age Month')
       .sort({ UploadDateTime: -1 });
     
     res.json(records);
@@ -256,7 +256,7 @@ router.get('/patient/:loginid', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const record = await PatientRecord.findById(req.params.id)
-      .populate('patientId');
+      .populate('patientId', 'loginid Name_CN Name_EN Email PhoneNumber Age Month');
     
     if (!record) {
       return res.status(404).json({ error: 'Record not found' });

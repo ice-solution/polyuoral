@@ -47,7 +47,8 @@ router.post('/register', async (req, res) => {
       Age,
       Month,
       Email,
-      PhoneNumber
+      PhoneNumber,
+      status: 'active' // 註冊時默認為 active
     });
 
     await patient.save();
@@ -98,6 +99,136 @@ router.post('/', async (req, res) => {
       });
     }
     res.status(400).json({ error: error.message });
+  }
+});
+
+// 申請帳號（不需要密碼，狀態設為 inactive）
+router.post('/application', async (req, res) => {
+  try {
+    const { Name_CN, Name_EN, Age, Month, Email, PhoneNumber } = req.body;
+
+    // 驗證必填欄位
+    if (!Name_CN || !Name_EN || !Age || !Month || !Email || !PhoneNumber) {
+      return res.status(400).json({
+        error: 'Missing required fields',
+        required: ['Name_CN', 'Name_EN', 'Age', 'Month', 'Email', 'PhoneNumber']
+      });
+    }
+
+    // 檢查 Email 是否已存在
+    const existingEmail = await Patient.findOne({ Email });
+    if (existingEmail) {
+      return res.status(409).json({
+        error: 'Email already exists',
+        message: '此電子郵件已被使用'
+      });
+    }
+
+    // 生成臨時 loginid（確保唯一性）
+    let tempLoginid;
+    let isUnique = false;
+    let attempts = 0;
+    const maxAttempts = 10;
+
+    // 確保生成的 loginid 是唯一的
+    while (!isUnique && attempts < maxAttempts) {
+      tempLoginid = `app_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const existing = await Patient.findOne({ loginid: tempLoginid });
+      if (!existing) {
+        isUnique = true;
+      }
+      attempts++;
+    }
+
+    if (!isUnique) {
+      return res.status(500).json({
+        error: 'Failed to generate unique loginid',
+        message: '無法生成唯一的登入帳號，請稍後再試'
+      });
+    }
+
+    const tempPassword = Math.random().toString(36).slice(-8); // 臨時密碼
+
+    // 加密密碼
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(tempPassword, salt);
+
+    // 建立新病人（狀態為 inactive）
+    const patient = new Patient({
+      loginid: tempLoginid,
+      Password: hashedPassword,
+      Name_CN,
+      Name_EN,
+      Age: Number(Age),
+      Month: Number(Month),
+      Email,
+      PhoneNumber,
+      status: 'inactive'
+    });
+
+    await patient.save();
+
+    // 回傳時不包含密碼
+    const patientResponse = patient.toObject();
+    delete patientResponse.Password;
+
+    res.status(201).json({
+      message: 'Application submitted successfully. Please wait for admin approval.',
+      application: patientResponse
+    });
+  } catch (error) {
+    console.error('Application submission error:', error);
+    console.error('Error details:', {
+      code: error.code,
+      keyPattern: error.keyPattern,
+      keyValue: error.keyValue,
+      message: error.message
+    });
+    
+    // 處理重複鍵錯誤
+    if (error.code === 11000) {
+      const field = Object.keys(error.keyPattern || {})[0] || 'unknown';
+      const fieldValue = error.keyValue || {};
+      
+      // 根據實際重複的字段返回對應的錯誤訊息
+      if (field === 'Email' || fieldValue.Email) {
+        return res.status(409).json({
+          error: 'Duplicate entry',
+          message: '此電子郵件已被使用',
+          field: 'Email'
+        });
+      } else if (field === 'loginid' || fieldValue.loginid) {
+        // 如果真的是 loginid 重複（理論上不應該發生），重新生成並重試
+        console.warn('Unexpected loginid duplicate, regenerating...');
+        // 這裡可以實現重試邏輯，但為了簡化，直接返回錯誤
+        return res.status(500).json({
+          error: 'System error',
+          message: '系統錯誤，請稍後再試'
+        });
+      } else {
+        // 其他字段重複（可能是舊的 Login_ID 索引問題）
+        return res.status(409).json({
+          error: 'Duplicate entry',
+          message: '此資料已被使用，請稍後再試',
+          field: field
+        });
+      }
+    }
+
+    // 處理驗證錯誤
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({
+        error: 'Validation error',
+        message: errors.join(', '),
+        details: errors
+      });
+    }
+
+    res.status(400).json({ 
+      error: error.message || '提交申請失敗',
+      message: '提交申請時發生錯誤，請稍後再試'
+    });
   }
 });
 

@@ -35,6 +35,16 @@ const RecordsManagement = () => {
   const [page, setPage] = useState(1);
   const [rowsPerPage] = useState(10);
 
+  // 從 URL 參數中讀取 loginid（如果有的話）
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const loginidFromUrl = urlParams.get('loginid');
+    if (loginidFromUrl) {
+      setSelectedPatient(loginidFromUrl);
+      setFilterLoginId(loginidFromUrl);
+    }
+  }, []);
+
   useEffect(() => {
     fetchData();
   }, []);
@@ -55,10 +65,31 @@ const RecordsManagement = () => {
     }
   };
 
-  const getPatientName = (loginid) => {
-    if (!loginid) return '未知用戶';
-    const patient = patients.find((p) => p.loginid === loginid);
-    return patient ? `${patient.Name_CN || ''} (${patient.Name_EN || ''})` : loginid;
+  const getPatientName = (record) => {
+    // 優先使用 populate 的 patientId（如果存在且是對象）
+    if (record.patientId && typeof record.patientId === 'object') {
+      const patient = record.patientId;
+      return `${patient.Name_CN || ''} (${patient.Name_EN || ''})`.trim() || '未知用戶';
+    }
+    
+    // 如果 patientId 是 ID 字符串，嘗試通過 ID 查找
+    if (record.patientId && typeof record.patientId === 'string') {
+      const patient = patients.find((p) => p._id === record.patientId);
+      if (patient) {
+        return `${patient.Name_CN || ''} (${patient.Name_EN || ''})`.trim() || '未知用戶';
+      }
+    }
+    
+    // 最後使用 loginid 查找
+    if (record.loginid) {
+      const patient = patients.find((p) => p.loginid === record.loginid);
+      if (patient) {
+        return `${patient.Name_CN || ''} (${patient.Name_EN || ''})`.trim() || record.loginid;
+      }
+      return record.loginid;
+    }
+    
+    return '未知用戶';
   };
 
   // 檢查數據是否真的存在（不是空對象或空數組）
@@ -150,11 +181,19 @@ const RecordsManagement = () => {
             }}
           >
             <MenuItem value="">全部用戶</MenuItem>
-            {uniqueLoginIds.map((loginid) => (
-              <MenuItem key={loginid} value={loginid}>
-                {getPatientName(loginid)} ({loginid})
-              </MenuItem>
-            ))}
+            {uniqueLoginIds.map((loginid) => {
+              // 查找對應的記錄來獲取患者信息
+              const record = records.find(r => r.loginid === loginid);
+              const patient = patients.find((p) => p.loginid === loginid);
+              const displayName = patient 
+                ? `${patient.Name_CN || ''} (${patient.Name_EN || ''})`.trim() || loginid
+                : loginid;
+              return (
+                <MenuItem key={loginid} value={loginid}>
+                  {displayName} ({loginid})
+                </MenuItem>
+              );
+            })}
           </Select>
         </FormControl>
         <Typography variant="body2" color="text.secondary">
@@ -168,7 +207,13 @@ const RecordsManagement = () => {
           <Accordion defaultExpanded>
             <AccordionSummary expandIcon={<ExpandMoreIcon />}>
               <Typography variant="h6">
-                {getPatientName(selectedPatient)} 的記錄 ({groupedByPatient[selectedPatient]?.length || 0} 筆)
+                {(() => {
+                  const patient = patients.find((p) => p.loginid === selectedPatient);
+                  const displayName = patient 
+                    ? `${patient.Name_CN || ''} (${patient.Name_EN || ''})`.trim() || selectedPatient
+                    : selectedPatient;
+                  return `${displayName} 的記錄 (${groupedByPatient[selectedPatient]?.length || 0} 筆)`;
+                })()}
               </Typography>
             </AccordionSummary>
             <AccordionDetails>
@@ -247,10 +292,9 @@ const RecordsManagement = () => {
             </AccordionDetails>
           </Accordion>
         </Box>
-      ) : null}
-
-      {/* 完整列表視圖 */}
-      <TableContainer component={Paper}>
+      ) : (
+        /* 完整列表視圖（只在沒有選擇特定用戶時顯示） */
+        <TableContainer component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
@@ -274,8 +318,8 @@ const RecordsManagement = () => {
                     {record._id.substring(0, 8)}...
                   </MuiLink>
                 </TableCell>
-                <TableCell>{getPatientName(record.loginid)}</TableCell>
-                <TableCell>{record.loginid || '無'}</TableCell>
+                <TableCell>{getPatientName(record)}</TableCell>
+                <TableCell>{record.loginid || (record.patientId && typeof record.patientId === 'object' ? record.patientId.loginid : '無') || '無'}</TableCell>
                 <TableCell>
                   {new Date(record.UploadDateTime).toLocaleString('zh-TW')}
                 </TableCell>
@@ -326,9 +370,10 @@ const RecordsManagement = () => {
           </TableBody>
         </Table>
       </TableContainer>
+      )}
 
-      {/* 分頁控制 */}
-      {totalPages > 1 && (
+      {/* 分頁控制（只在沒有選擇特定用戶時顯示） */}
+      {!selectedPatient && totalPages > 1 && (
         <Box display="flex" justifyContent="center" mt={3}>
           <Pagination
             count={totalPages}

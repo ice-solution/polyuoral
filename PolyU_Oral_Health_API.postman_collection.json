@@ -1,9 +1,10 @@
 {
 	"info": {
 		"name": "PolyU Oral Health API",
-		"description": "完整的口腔健康數據 API Collection",
+		"description": "完整的口腔健康數據 API Collection（已更新至最新 Model 結構）",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "polyu-oral-api"
+		"_exporter_id": "polyu-oral-api",
+		"version": "2.0.0"
 	},
 	"item": [
 		{
@@ -311,34 +312,16 @@
 									"src": []
 								},
 								{
-									"key": "TeethInPhoto1",
-									"type": "file",
-									"src": []
-								},
-								{
-									"key": "TeethInPhoto2",
-									"type": "file",
-									"src": []
-								},
-								{
-									"key": "TeethInPhoto3",
-									"type": "file",
-									"src": []
-								},
-								{
-									"key": "TeethInPhoto4",
-									"type": "file",
-									"src": []
-								},
-								{
 									"key": "HRV",
-									"value": "{\"RMSSD\":25,\"SDNN\":40,\"pNN50\":10,\"SD1\":20,\"SD2\":30,\"HeartBeat\":[60,65,70],\"Times\":[0.1,0.2,0.3],\"IBIms\":[1000,950,900]}",
-									"type": "text"
+									"value": "{\"RMSSD\":25.5,\"SDNN\":40.2,\"pNN50\":10.3,\"SD1\":20.1,\"SD2\":30.4,\"HeartBeat\":[60.5,65.2,70.1,68.3],\"Times\":[0.1,0.2,0.3,0.4],\"IBIms\":[1000.5,950.2,900.1,880.3]}",
+									"type": "text",
+									"description": "HRV 數據格式：RMSSD, SDNN, pNN50, SD1, SD2 (Number), HeartBeat, Times, IBIms (Array of Number)"
 								},
 								{
 									"key": "GSR",
-									"value": "{\"RawIndex\":[0,1,2],\"RawValue\":[100,200,300],\"RawTime\":[0.1,0.2,0.3],\"SCL\":[1.5,1.6,1.7]}",
-									"type": "text"
+									"value": "{\"RawIndex\":[0,1,2,3],\"RawValue\":[100.5,200.2,300.1,250.3],\"RawTime\":[0.1,0.2,0.3,0.4],\"SCL\":[1.5,1.6,1.7,1.65]}",
+									"type": "text",
+									"description": "GSR 數據格式：RawIndex, RawValue, RawTime, SCL (Array of Number)"
 								}
 							]
 						},
@@ -348,6 +331,69 @@
 							"path": ["api", "patient-records"]
 						},
 						"description": "使用 form-data 上傳圖片和數據。\n\n1. loginid: Text 類型，輸入病人的 loginid\n2. 照片欄位: File 類型，選擇圖片檔案\n3. HRV/GSR: Text 類型，輸入 JSON 字串\n\n注意：HRV 和 GSR 需要是 JSON 字串格式"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Patient Record (Photos + HRV + HRV2 + GSR + GSR2)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "loginid",
+									"value": "patient001",
+									"type": "text"
+								},
+								{
+									"key": "FacePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TouguePhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "TeethEPhoto",
+									"type": "file",
+									"src": []
+								},
+								{
+									"key": "HRV",
+									"value": "{\"RMSSD\":25.5,\"SDNN\":40.2,\"pNN50\":10.3,\"SD1\":20.1,\"SD2\":30.4,\"HeartBeat\":[60.5,65.2,70.1,68.3],\"Times\":[0.1,0.2,0.3,0.4],\"IBIms\":[1000.5,950.2,900.1,880.3]}",
+									"type": "text",
+									"description": "HRV 數據格式"
+								},
+								{
+									"key": "HRV2",
+									"value": "{\"RMSSD\":26.1,\"SDNN\":41.5,\"pNN50\":11.2,\"SD1\":21.3,\"SD2\":31.6,\"HeartBeat\":[61.2,66.1,71.5,69.2],\"Times\":[0.1,0.2,0.3,0.4],\"IBIms\":[980.5,960.1,920.3,890.2]}",
+									"type": "text",
+									"description": "HRV2 數據格式"
+								},
+								{
+									"key": "GSR",
+									"value": "{\"RawIndex\":[0,1,2,3],\"RawValue\":[100.5,200.2,300.1,250.3],\"RawTime\":[0.1,0.2,0.3,0.4],\"SCL\":[1.5,1.6,1.7,1.65]}",
+									"type": "text",
+									"description": "GSR 數據格式"
+								},
+								{
+									"key": "GSR2",
+									"value": "{\"RawIndex\":[0,1,2,3],\"RawValue\":[110.2,210.5,310.3,260.1],\"RawTime\":[0.1,0.2,0.3,0.4],\"SCL\":[1.55,1.65,1.75,1.7]}",
+									"type": "text",
+									"description": "GSR2 數據格式"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/patient-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "patient-records"]
+						},
+						"description": "創建包含所有數據類型的記錄（HRV, HRV2, GSR, GSR2）"
 					},
 					"response": []
 				},
@@ -370,7 +416,7 @@
 						"method": "GET",
 						"header": [],
 						"url": {
-							"raw": "{{base_url}}/api/patient-records?loginid=patient001&hasHRV=true&hasGSR=true&startDate=2024-01-01&endDate=2024-12-31",
+							"raw": "{{base_url}}/api/patient-records?loginid=patient001&hasHRV=true&hasGSR=true&hasHRV2=true&hasGSR2=true&startDate=2024-01-01&endDate=2024-12-31",
 							"host": ["{{base_url}}"],
 							"path": ["api", "patient-records"],
 							"query": [
@@ -384,6 +430,14 @@
 								},
 								{
 									"key": "hasGSR",
+									"value": "true"
+								},
+								{
+									"key": "hasHRV2",
+									"value": "true"
+								},
+								{
+									"key": "hasGSR2",
 									"value": "true"
 								},
 								{
@@ -449,7 +503,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40,\n    \"pNN50\": 10,\n    \"SD1\": 20,\n    \"SD2\": 30\n  }\n}"
+							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25.5,\n    \"SDNN\": 40.2,\n    \"pNN50\": 10.3,\n    \"SD1\": 20.1,\n    \"SD2\": 30.4,\n    \"HeartBeat\": [60.5, 65.2, 70.1],\n    \"Times\": [0.1, 0.2, 0.3],\n    \"IBIms\": [1000.5, 950.2, 900.1]\n  },\n  \"GSR\": {\n    \"RawIndex\": [0, 1, 2],\n    \"RawValue\": [100.5, 200.2, 300.1],\n    \"RawTime\": [0.1, 0.2, 0.3],\n    \"SCL\": [1.5, 1.6, 1.7]\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patient-records/:id",
@@ -477,7 +531,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40\n  }\n}"
+							"raw": "{\n  \"HRV\": {\n    \"RMSSD\": 25.5,\n    \"SDNN\": 40.2\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/patient-records/:id",
@@ -576,7 +630,7 @@
 			"name": "Data Records (備用)",
 			"item": [
 				{
-					"name": "Create Data Record",
+					"name": "Create HRV Data Record",
 					"request": {
 						"method": "POST",
 						"header": [
@@ -587,13 +641,106 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"HRV\",\n  \"HRV\": {\n    \"RMSSD\": 25,\n    \"SDNN\": 40,\n    \"pNN50\": 10,\n    \"SD1\": 20,\n    \"SD2\": 30\n  }\n}"
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"HRV\",\n  \"HRV\": {\n    \"RMSSD\": 25.5,\n    \"SDNN\": 40.2,\n    \"pNN50\": 10.3,\n    \"SD1\": 20.1,\n    \"SD2\": 30.4,\n    \"HeartBeat\": [60.5, 65.2, 70.1, 68.3],\n    \"Times\": [0.1, 0.2, 0.3, 0.4],\n    \"IBIms\": [1000.5, 950.2, 900.1, 880.3]\n  }\n}"
 						},
 						"url": {
 							"raw": "{{base_url}}/api/data-records",
 							"host": ["{{base_url}}"],
 							"path": ["api", "data-records"]
-						}
+						},
+						"description": "創建 HRV 數據記錄。格式：RMSSD, SDNN, pNN50, SD1, SD2 (Number), HeartBeat, Times, IBIms (Array of Number)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create HRV2 Data Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"HRV2\",\n  \"HRV2\": {\n    \"RMSSD\": 26.1,\n    \"SDNN\": 41.5,\n    \"pNN50\": 11.2,\n    \"SD1\": 21.3,\n    \"SD2\": 31.6,\n    \"HeartBeat\": [61.2, 66.1, 71.5, 69.2],\n    \"Times\": [0.1, 0.2, 0.3, 0.4],\n    \"IBIms\": [980.5, 960.1, 920.3, 890.2]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						},
+						"description": "創建 HRV2 數據記錄。格式與 HRV 相同"
+					},
+					"response": []
+				},
+				{
+					"name": "Create GSR Data Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"GSR\",\n  \"GSR\": {\n    \"RawIndex\": [0, 1, 2, 3],\n    \"RawValue\": [100.5, 200.2, 300.1, 250.3],\n    \"RawTime\": [0.1, 0.2, 0.3, 0.4],\n    \"SCL\": [1.5, 1.6, 1.7, 1.65]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						},
+						"description": "創建 GSR 數據記錄。格式：RawIndex, RawValue, RawTime, SCL (Array of Number)"
+					},
+					"response": []
+				},
+				{
+					"name": "Create GSR2 Data Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"GSR2\",\n  \"GSR2\": {\n    \"RawIndex\": [0, 1, 2, 3],\n    \"RawValue\": [110.2, 210.5, 310.3, 260.1],\n    \"RawTime\": [0.1, 0.2, 0.3, 0.4],\n    \"SCL\": [1.55, 1.65, 1.75, 1.7]\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						},
+						"description": "創建 GSR2 數據記錄。格式與 GSR 相同"
+					},
+					"response": []
+				},
+				{
+					"name": "Create Pulse Data Record",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"loginid\": \"patient001\",\n  \"type\": \"Pulse\",\n  \"Pulse\": {\n    \"Data_1_L\": 1.5,\n    \"Data_2_L\": 2.3,\n    \"Data_3_L\": 3.1,\n    \"Data_4_L\": 4.2,\n    \"Data_5_L\": 5.0,\n    \"Data_6_L\": 6.1,\n    \"Data_7_L\": 7.2,\n    \"Data_8_L\": 8.3,\n    \"Data_9_L\": 9.1,\n    \"Data_10_L\": 10.2,\n    \"Data_11_L\": 11.3,\n    \"Data_12_L\": 12.1,\n    \"Data_1_R\": 1.6,\n    \"Data_2_R\": 2.4,\n    \"Data_3_R\": 3.2,\n    \"Data_4_R\": 4.3,\n    \"Data_5_R\": 5.1,\n    \"Data_6_R\": 6.2,\n    \"Data_7_R\": 7.3,\n    \"Data_8_R\": 8.4,\n    \"Data_9_R\": 9.2,\n    \"Data_10_R\": 10.3,\n    \"Data_11_R\": 11.4,\n    \"Data_12_R\": 12.2\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/data-records",
+							"host": ["{{base_url}}"],
+							"path": ["api", "data-records"]
+						},
+						"description": "創建脈搏數據記錄"
 					},
 					"response": []
 				},
@@ -773,7 +920,7 @@
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:3000",
+			"value": "http://localhost:3101",
 			"type": "string"
 		},
 		{
@@ -783,4 +930,3 @@
 		}
 	]
 }
-

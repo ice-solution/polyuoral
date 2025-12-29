@@ -1,6 +1,7 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import { Box } from '@mui/material';
+import Home from './pages/Home';
 import AdminLogin from './pages/admin/AdminLogin';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import UserLogin from './pages/user/UserLogin';
@@ -14,6 +15,9 @@ function App() {
   return (
     <Box sx={{ minHeight: '100vh', backgroundColor: 'background.default' }}>
       <Routes>
+        {/* Home Page */}
+        <Route path="/" element={<Home />} />
+
         {/* Admin Routes */}
         <Route path="/admin/login" element={<AdminLogin />} />
         <Route
@@ -51,9 +55,6 @@ function App() {
             </PrivateRoute>
           }
         />
-
-        {/* Default redirect */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
       </Routes>
     </Box>
   );

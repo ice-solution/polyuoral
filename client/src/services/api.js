@@ -5,8 +5,12 @@ const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:3000/api
 
 // 在開發環境中顯示使用的 API URL
 if (process.env.NODE_ENV === 'development') {
-  console.log('🌐 API Base URL:', API_BASE_URL);
+  console.log('🌐 API Base URL (Development):', API_BASE_URL);
 }
+
+// 在生產構建時，環境變數會被內嵌到代碼中
+// 構建時使用的 URL: process.env.REACT_APP_API_URL
+// 可以通過檢查構建文件來驗證：grep -r "polyu.ice-solution.hk" build/static/js/
 
 const api = axios.create({
   baseURL: API_BASE_URL,
