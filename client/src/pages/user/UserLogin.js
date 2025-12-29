@@ -40,6 +40,8 @@ const UserLogin = () => {
         // 普通用戶
         localStorage.setItem('token', token);
         localStorage.setItem('user', JSON.stringify({ ...patient, role: 'user' }));
+        // 將密碼暫時存儲到 sessionStorage（僅用於生成 QR code，關閉瀏覽器後會清除）
+        sessionStorage.setItem('loginPassword', password);
         navigate('/dashboard');
       }
     } catch (err) {
@@ -125,5 +127,6 @@ const UserLogin = () => {
 };
 
 export default UserLogin;
+
 
 

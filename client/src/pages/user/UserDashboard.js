@@ -26,6 +26,7 @@ import {
   Assignment as AssignmentIcon,
   CalendarToday as CalendarIcon,
 } from '@mui/icons-material';
+import { QRCodeSVG } from 'qrcode.react';
 import { authAPI, patientRecordAPI } from '../../services/api';
 
 const UserDashboard = () => {
@@ -63,6 +64,7 @@ const UserDashboard = () => {
     } finally {
       localStorage.removeItem('token');
       localStorage.removeItem('user');
+      sessionStorage.removeItem('loginPassword');
       navigate('/login');
     }
   };
@@ -115,6 +117,23 @@ const UserDashboard = () => {
       </AppBar>
 
       <Container maxWidth="lg" sx={{ py: 4 }}>
+        {/* 登入 QR Code */}
+        {user?.loginid && sessionStorage.getItem('loginPassword') && (
+          <Paper sx={{ p: 3, mb: 4, textAlign: 'center' }}>
+            <Typography variant="h6" gutterBottom>
+              登入 QR Code
+            </Typography>
+            <Box sx={{ display: 'flex', justifyContent: 'center' }}>
+              <QRCodeSVG
+                value={`login|${user.loginid}|${sessionStorage.getItem('loginPassword')}`}
+                size={200}
+                level="H"
+                includeMargin={true}
+              />
+            </Box>
+          </Paper>
+        )}
+
         <Typography variant="h4" gutterBottom>
           我的記錄
         </Typography>
